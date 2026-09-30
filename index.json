@@ -7,7 +7,7 @@
       "name": "Wave",
       "author": "hardWorker254",
       "license": "MIT",
-      "description": "A travelling wave with a tail, on every model",
+      "description": "A travelling wave, written separately for each phone's strip",
       "version": 1,
       "devices": [
         "PHONE1",
@@ -16,7 +16,7 @@
         "PHONE3A"
       ],
       "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/wave.glyphlua",
-      "sha256": "eef67c6a1c71082cbe56443aa0a63fc43e9f698ba4358f268a86d4071b1f9bc0"
+      "sha256": "a9264da0cc63104d86a51223bd2ec13b4a83243ae3a5d94695f2dfebe3149709"
     }
   ]
 }

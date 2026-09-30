@@ -2,40 +2,116 @@
 -- format: 1
 -- name: Wave
 -- id: wave
--- author: glyph-sharge
+-- author: hardWorker254
 -- license: MIT
--- description: A travelling wave with a tail, on every model
+-- description: A travelling wave, written separately for each phone's strip
 -- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
 -- created: 1712345678000
 -- updated: 1712345678000
 
 local util = require("glyph.util")
 
--- Anchor on the C strip: it exists on every supported model, and its length
--- is what makes the timing portable.
+-- The C strip exists on every supported model, and its length is what makes
+-- the timing portable: 4 segments on a Phone (1), 16 on a Phone (2), 24 on a
+-- Phone (2a), 20 on a Phone (3a).
 local strip = glyph.ch.c
 local n = #strip
 if n == 0 then return end
 
--- D and E do not exist on the 2a or the 3a. A missing accent is skipped,
--- not treated as "light nothing" — glyph.set({}) blanks the strip.
+-- `d` and `e` exist only on the Phone (1) and the Phone (2). Everywhere else
+-- they are empty tables rather than nil, and lighting an empty list blanks the
+-- whole strip — so a missing accent is skipped here instead of drawn there.
 local accents = {}
-for _, g in ipairs({ glyph.ch.d, glyph.ch.e, glyph.ch.pulse }) do
-  for _, ch in ipairs(g) do accents[#accents + 1] = ch end
+for _, group in ipairs({ glyph.ch.a, glyph.ch.b, glyph.ch.d, glyph.ch.e, glyph.ch.pulse }) do
+  for _, channel in ipairs(group) do accents[#accents + 1] = channel end
 end
 
-local step = math.max(25, math.floor(600 / n))
+local DIM, MID, FULL = 400, 1800, glyph.MAX
 
-for i = 1, n do
-  glyph.set({ strip[i] }, util.lerp(1000, glyph.MAX, i / n), step)
+-- A ramp along the strip: `lo` at the far end, `hi` at the near one.
+local function wave(lo, hi, step)
+  for i = 1, n do
+    glyph.set({ strip[i] }, util.lerp(lo, hi, i / n), step)
+  end
 end
 
-for i = 1, #accents do
-  glyph.set({ accents[i] }, util.mapRange(i, 1, #accents, 800, glyph.MAX), step)
+-- Every accent at one level, walked in order.
+local function accentPass(level, step)
+  for i = 1, #accents do
+    glyph.set({ accents[i] }, level, step)
+  end
 end
 
-for i = n, 1, -1 do
-  glyph.set({ strip[i] }, util.lerp(1000, glyph.MAX, i / n), step)
-end
+if glyph.device == "PHONE1" then
+  -- Four segments cannot show a gradient: three of the four steps would sit
+  -- within a rounding error of each other and the ramp would read as a single
+  -- flat block. So the strip is even, and the long bottom strip is what carries
+  -- the movement instead — which is also why the step is shorter here than the
+  -- strip's length would suggest.
+  local s = 90
+  wave(DIM, DIM, s)
+  wave(FULL, FULL, s)
+  wave(MID, MID, s)
+  glyph.off(60)
+  wave(FULL, FULL, s)
+  wave(DIM, DIM, s)
+  glyph.off(200)
 
-glyph.off(200)
+elseif glyph.device == "PHONE2" then
+  -- Sixteen segments: enough for a real head and tail, and sixteen accents
+  -- worth enough to deserve a pass of their own rather than a footnote.
+  local s = 40
+  wave(DIM, FULL, s)
+  accentPass(MID, s)
+  wave(FULL, DIM, s)
+  accentPass(DIM, s)
+  glyph.off(80)
+  wave(DIM, FULL, s)
+  accentPass(FULL, s)
+  glyph.off(200)
+
+elseif glyph.device == "PHONE2A" then
+  -- The longest C strip of the four, and the fewest accents — two, one segment
+  -- each. So the wave runs at its smoothest and the pair is used as a cap on
+  -- the ends of the strip instead of as a second pattern.
+  local s = 28
+  wave(DIM, FULL, s)
+  glyph.set(glyph.ch.a, FULL, s)
+  glyph.set(glyph.ch.b, MID, s)
+  wave(FULL, DIM, s)
+  glyph.set(glyph.ch.b, MID, s)
+  glyph.set(glyph.ch.a, FULL, s)
+  glyph.off(120)
+  wave(DIM, FULL, s)
+  glyph.off(200)
+
+elseif glyph.device == "PHONE3A" then
+  -- Twenty segments of strip beside eleven A and five B, so the two can travel
+  -- in opposite directions and meet in the middle. The only model here with
+  -- enough accent segments for a counter-ramp to read as one.
+  local s = 32
+  local a, b = glyph.ch.a, glyph.ch.b
+  for i = 1, n do
+    glyph.set({ strip[i] }, util.lerp(DIM, FULL, i / n), s)
+  end
+  for i = 1, #a do
+    glyph.set({ a[i] }, util.lerp(FULL, DIM, i / #a), s)
+  end
+  for i = 1, #b do
+    glyph.set({ b[i] }, util.lerp(DIM, FULL, i / #b), s)
+  end
+  glyph.off(60)
+  for i = 1, n do
+    glyph.set({ strip[i] }, util.lerp(FULL, DIM, i / n), s)
+  end
+  glyph.off(200)
+
+else
+  -- A phone this build has never heard of. The plainest wave there is, built
+  -- from the C strip alone — the one group every layout has — and with the
+  -- step derived from its length, so it still runs rather than erroring.
+  local s = math.max(25, math.floor(700 / n))
+  wave(DIM, FULL, s)
+  wave(FULL, DIM, s)
+  glyph.off(200)
+end
