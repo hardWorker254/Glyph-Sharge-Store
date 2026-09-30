@@ -1,0 +1,41 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Wave
+-- id: wave
+-- author: glyph-sharge
+-- license: MIT
+-- description: A travelling wave with a tail, on every model
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+local util = require("glyph.util")
+
+-- Anchor on the C strip: it exists on every supported model, and its length
+-- is what makes the timing portable.
+local strip = glyph.ch.c
+local n = #strip
+if n == 0 then return end
+
+-- D and E do not exist on the 2a or the 3a. A missing accent is skipped,
+-- not treated as "light nothing" — glyph.set({}) blanks the strip.
+local accents = {}
+for _, g in ipairs({ glyph.ch.d, glyph.ch.e, glyph.ch.pulse }) do
+  for _, ch in ipairs(g) do accents[#accents + 1] = ch end
+end
+
+local step = math.max(25, math.floor(600 / n))
+
+for i = 1, n do
+  glyph.set({ strip[i] }, util.lerp(1000, glyph.MAX, i / n), step)
+end
+
+for i = 1, #accents do
+  glyph.set({ accents[i] }, util.mapRange(i, 1, #accents, 800, glyph.MAX), step)
+end
+
+for i = n, 1, -1 do
+  glyph.set({ strip[i] }, util.lerp(1000, glyph.MAX, i / n), step)
+end
+
+glyph.off(200)
