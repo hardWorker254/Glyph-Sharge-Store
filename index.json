@@ -8,7 +8,7 @@
       "author": "hardWorker254",
       "license": "MIT",
       "description": "A travelling wave, written separately for each phone's strip",
-      "version": 1,
+      "version": 2,
       "devices": [
         "PHONE1",
         "PHONE2",
