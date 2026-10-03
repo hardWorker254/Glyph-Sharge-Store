@@ -1,0 +1,109 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Drawing Primer
+-- id: drawing
+-- author: hardWorker254
+-- license: MIT
+-- description: The four basic calls, set and setAll and off and hold, in one study of levels
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- The whole language is four calls. `set` lights channels and
+-- leaves them lit, `setAll` lights every channel the phone has,
+-- `off` blanks the strip and then waits, and `hold` waits
+-- without letting go of the stop button. Everything else in the
+-- API is those four calls arranged in a loop.
+
+local DIM, MID, FULL = 400, 1800, glyph.MAX
+
+local strip = glyph.ch.c
+local n = #strip
+if n == 0 then return end
+
+-- Three bands of brightness along the strip: the first half at
+-- the dim level, the next quarter at the middle one, the last
+-- quarter at full. `set` paints one segment at a time and
+-- leaves it lit, so the bands survive until something else
+-- draws over them.
+local function bands(step)
+  for i = 1, n do
+    local level = DIM
+    if i > n / 2 then level = MID end
+    if i > (3 * n) / 4 then level = FULL end
+    glyph.set({ strip[i] }, level, step)
+  end
+end
+
+-- Every accent at one level: the A and B segments, the D strip
+-- and the E where the phone has them. `d` and `e` are empty
+-- tables rather than nil on the models without them, and
+-- lighting an empty list blanks the whole phone, so the missing
+-- ones are collected as nothing instead of drawn as a blank.
+local accents = {}
+for _, group in ipairs({ glyph.ch.a, glyph.ch.b, glyph.ch.d, glyph.ch.e }) do
+  for _, channel in ipairs(group) do accents[#accents + 1] = channel end
+end
+
+local function accentLevel(level, step)
+  if #accents == 0 then return end
+  glyph.set(accents, level, step)
+end
+
+if glyph.device == "PHONE1" then
+  -- Four segments make the bands one segment wide apiece, so
+  -- the accents carry the levels as well: one A, one B, one E
+  -- and eight D, eleven channels beside the strip itself.
+  local s = 120
+  bands(s)
+  accentLevel(MID, s)
+  glyph.setAll(FULL, s)
+  glyph.hold(s * 2)
+  glyph.off(s * 3)
+
+elseif glyph.device == "PHONE2" then
+  -- Sixteen segments show all three bands at their real widths,
+  -- and twelve accents deserve a level of their own between
+  -- the bands. `setAll` is the only call that reaches the
+  -- second C run, so the blanket pass is the one that proves
+  -- it is there.
+  local s = 55
+  bands(s)
+  accentLevel(DIM, s)
+  glyph.setAll(MID, s * 2)
+  glyph.hold(s * 2)
+  accentLevel(FULL, s)
+  glyph.off(s * 3)
+
+elseif glyph.device == "PHONE2A" then
+  -- The longest strip of the four and the fewest accents, two
+  -- channels one segment each. The bands are the whole story,
+  -- and the pair is used as a full-brightness full stop.
+  local s = 35
+  bands(s)
+  glyph.setAll(MID, s * 2)
+  glyph.hold(s * 2)
+  accentLevel(FULL, s)
+  glyph.off(s * 3)
+
+elseif glyph.device == "PHONE3A" then
+  -- Twenty segments and sixteen accents: enough for the bands
+  -- and enough for the accents to walk, one level at a time,
+  -- while the bands hold.
+  local s = 40
+  bands(s)
+  accentLevel(DIM, s)
+  accentLevel(MID, s)
+  glyph.setAll(FULL, s)
+  glyph.hold(s * 2)
+  glyph.off(s * 3)
+
+else
+  -- A phone this build has never heard of. The plainest study
+  -- there is, built from the C strip alone, with the step
+  -- derived from its length so it still runs.
+  local s = math.max(30, math.floor(360 / n))
+  bands(s)
+  glyph.setAll(MID, s * 2)
+  glyph.off(s * 3)
+end

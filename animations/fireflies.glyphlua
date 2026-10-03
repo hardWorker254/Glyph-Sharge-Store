@@ -1,0 +1,103 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Fireflies
+-- id: fireflies
+-- author: hardWorker254
+-- license: MIT
+-- description: Seeded random twinkles, each on its own eased curve, rnd and rndFloat and seed and ease
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- `seed` fixes the generator, so the pattern is the
+-- same every run: a demo that repeats is a demo that
+-- can be compared. Without it, `rnd` and `rndFloat`
+-- draw a new sky every time.
+
+glyph.seed(20240501)
+
+local FULL = glyph.MAX
+
+local strip = glyph.ch.c
+local n = #strip
+if n == 0 then return end
+
+-- The curves a twinkle can travel. `ease` takes a
+-- position in 0..1 and the curve's name; a name it
+-- does not know is a straight line, which is its own
+-- kind of twinkle.
+local curves = { "in", "out", "inout", "bounce", "wave", "pulse" }
+
+-- One twinkle: up the curve to full, and down again, at
+-- the segment the firefly chose. The rise point is a
+-- fraction of the twinkle, held between a fifth and
+-- four fifths of it, so the peak can sit anywhere
+-- along it and the curve never divides by zero.
+local function twinkle(i, curve, rise)
+  for t = 0, 10 do
+    local x = t / 10
+    local level
+    if x < rise then
+      level = FULL * glyph.ease(x / rise, curve)
+    else
+      level = FULL * glyph.ease((1 - x) / (1 - rise), curve)
+    end
+    glyph.set({ strip[i] }, level, 25)
+  end
+end
+
+-- One round: as many fireflies as the sky holds, each
+-- on a segment the generator picks, a curve the
+-- generator picks, and a rise point the generator picks.
+-- `rnd(a, b)` is an integer anywhere in the range, and
+-- `rndFloat()` is a fraction in 0..1.
+local function round(count)
+  for i = 1, count do
+    twinkle(glyph.rnd(1, n), curves[glyph.rnd(1, #curves)],
+      0.2 + 0.6 * glyph.rndFloat())
+  end
+end
+
+-- Ten rounds everywhere, so the same seed draws the same
+-- sky on every phone; only the density differs, because
+-- a short strip is a small sky.
+if glyph.device == "PHONE1" then
+  -- Four segments hold two fireflies at most before the
+  -- sky is a solid glow.
+  for i = 1, 10 do round(2) end
+  glyph.off(150)
+
+elseif glyph.device == "PHONE2" then
+  -- Sixteen segments hold four, the density a phone
+  -- with a long strip can carry.
+  for i = 1, 10 do round(4) end
+  glyph.off(150)
+
+elseif glyph.device == "PHONE2A" then
+  -- Twenty-four segments, the widest sky of the four:
+  -- six fireflies, because there is room for the
+  -- pattern to be a constellation rather than a flash.
+  for i = 1, 10 do round(6) end
+  glyph.off(150)
+
+elseif glyph.device == "PHONE3A" then
+  -- Twenty segments beside sixteen accents: six
+  -- fireflies on the strip, and the accents hold the
+  -- last twinkle's segment lit for a moment, as the
+  -- sky's afterglow.
+  local last = 1
+  for i = 1, 10 do
+    last = glyph.rnd(1, n)
+    round(5)
+    twinkle(last, curves[glyph.rnd(1, #curves)],
+      0.2 + 0.6 * glyph.rndFloat())
+  end
+  glyph.set({ strip[last] }, 900, 400)
+  glyph.off(150)
+
+else
+  -- A phone this build has never heard of: three
+  -- fireflies a round, whatever the strip reports.
+  for i = 1, 10 do round(3) end
+  glyph.off(150)
+end

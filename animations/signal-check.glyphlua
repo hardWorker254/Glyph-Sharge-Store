@@ -1,0 +1,135 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Signal Check
+-- id: signal-check
+-- author: hardWorker254
+-- license: MIT
+-- description: The network state as light, connected and wifi and metered and vpn from glyph.net
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- The network, as one consistent snapshot: `connected`,
+-- `wifi`, `metered` and `vpn` are read together, live,
+-- and open no socket, because a script can ask what the
+-- phone sees rather than reach out itself.
+
+local net = require("glyph.net")
+
+local DIM, MID, FULL = 400, 1800, glyph.MAX
+
+-- The state, reported first: the console is where a
+-- check says what it found, before the strip says it in
+-- light. A boolean cannot be glued to a string, so it
+-- goes through tostring.
+print("connected: " .. tostring(net.connected))
+print("wifi: " .. tostring(net.wifi))
+print("metered: " .. tostring(net.metered))
+print("vpn: " .. tostring(net.vpn))
+
+if not net.connected then
+  -- No network at all: one blink of everything, and the
+  -- strip is done, because a script that cannot see its
+  -- input should not pretend it can.
+  glyph.blinkAll(150, 300, DIM, 1)
+  glyph.off(200)
+  return
+end
+
+-- The level of the connection, in light: Wi-Fi at full,
+-- a metered connection at dim, because the phone is
+-- paying for the bytes, and anything else in between.
+local level = MID
+if net.wifi then level = FULL end
+if net.metered and not net.wifi then level = DIM end
+
+local strip = glyph.ch.c
+local n = #strip
+if n == 0 then return end
+
+-- The channels `all` names that no other group does: on
+-- a Phone (2) that is the second C run, five channels
+-- no name reaches; on every other phone it is nothing.
+-- Found by difference, never by number, so the script
+-- survives a layout change.
+local known = {}
+for _, group in ipairs({ glyph.ch.a, glyph.ch.b, glyph.ch.c, glyph.ch.d, glyph.ch.e }) do
+  for _, channel in ipairs(group) do known[channel] = true end
+end
+local extra = {}
+for _, channel in ipairs(glyph.ch.all) do
+  if not known[channel] then extra[#extra + 1] = channel end
+end
+
+if glyph.device == "PHONE1" then
+  -- Four C segments beside eight D: the pass runs the
+  -- strip and the D strip together, because on this
+  -- phone they are both long enough to carry a level.
+  local s = math.max(40, math.floor(360 / (n + #glyph.ch.d)))
+  for i = 1, n do
+    glyph.set({ strip[i] }, level, s)
+  end
+  for i = 1, #glyph.ch.d do
+    glyph.set({ glyph.ch.d[i] }, math.floor(level / 2), s)
+  end
+
+elseif glyph.device == "PHONE2" then
+  -- Sixteen C segments and the second C run: the pass
+  -- runs the named strip, then the five channels only
+  -- `all` knows, at half the level.
+  local s = 40
+  for i = 1, n do
+    glyph.set({ strip[i] }, level, s)
+  end
+  for i = 1, #extra do
+    glyph.set({ extra[i] }, math.floor(level / 2), s)
+  end
+
+elseif glyph.device == "PHONE2A" then
+  -- Twenty-four C segments and nothing else that
+  -- matters: the pass is the whole animation, slow on
+  -- the long strip.
+  local s = 30
+  for i = 1, n do
+    glyph.set({ strip[i] }, level, s)
+  end
+
+elseif glyph.device == "PHONE3A" then
+  -- Twenty C segments beside sixteen accents: the pass
+  -- runs the strip, then the A and B groups answer at
+  -- half the level, in their physical order.
+  local s = 35
+  for i = 1, n do
+    glyph.set({ strip[i] }, level, s)
+  end
+  for _, group in ipairs({ glyph.ch.a, glyph.ch.b }) do
+    for i = 1, #group do
+      glyph.set({ group[i] }, math.floor(level / 2), s)
+    end
+  end
+
+else
+  -- A phone this build has never heard of: the C strip
+  -- at the connection's level, paced by its length.
+  local s = math.max(30, math.floor(320 / n))
+  for i = 1, n do
+    glyph.set({ strip[i] }, level, s)
+  end
+end
+
+-- A VPN is worth a flash of its own, because it is the
+-- one thing on the list that changes where the traffic
+-- goes rather than how it arrives: every accent the
+-- phone has, once, bright.
+if net.vpn then
+  local accents = {}
+  for _, group in ipairs({ glyph.ch.a, glyph.ch.b, glyph.ch.d, glyph.ch.e }) do
+    for _, channel in ipairs(group) do accents[#accents + 1] = channel end
+  end
+  if #accents > 0 then
+    glyph.pulse(accents, 200, 150, FULL)
+  end
+  print("vpn: the accent flash is the tunnel")
+end
+
+glyph.off(300)

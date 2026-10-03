@@ -1,0 +1,80 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Spectrum Studio
+-- id: spectrum
+-- author: hardWorker254
+-- license: MIT
+-- description: The spectrum split three ways, bass and mid and treble on their own groups, with a beat flash
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- A visualiser script declares its target before its
+-- first draw: this one belongs to the music visualiser
+-- and appears in no other picker, because everywhere
+-- else every `glyph.audio` value reads zero.
+
+glyph.target = "music"
+
+local util = require("glyph.util")
+
+local FULL = glyph.MAX
+
+-- The three thirds of the spectrum, each on its own
+-- group. A Phone (1) has one A and one B segment beside
+-- four C; a Phone (3a) has eleven A and five B beside
+-- twenty C, so on that phone the A strip is the middle
+-- voice and the B group the top: the balance is the
+-- phone's own, and the idea is portable.
+local bass, mid, treble
+if glyph.device == "PHONE3A" then
+  bass, mid, treble = glyph.ch.b, glyph.ch.c, glyph.ch.a
+else
+  bass, mid, treble = glyph.ch.a, glyph.ch.c, glyph.ch.b
+end
+
+-- `glyph.audio` is a set of values, not functions:
+-- `bass`, `mid` and `treble` are the energy of each
+-- third of the spectrum, `level` is the loudness, `beat`
+-- is true on the single frame a beat was detected, and
+-- `bands(n)` is the one that takes an argument, a table
+-- of n levels for a per-segment equaliser. `active` is
+-- false until a capture is feeding all of them.
+
+-- The loop a visualiser runs: until the service stops
+-- it, because `running` is the value that goes false
+-- when the music ends or the user leaves.
+while glyph.running do
+  -- Each third on its own group, its 0..1 energy
+  -- carried onto 0..MAX by `mapRange`, which pins both
+  -- ends of the range.
+  if #bass > 0 then
+    glyph.set(bass, util.mapRange(glyph.audio.bass, 0, 1, 0, FULL))
+  end
+  if #mid > 0 then
+    glyph.set(mid, util.mapRange(glyph.audio.mid, 0, 1, 0, FULL))
+  end
+  if #treble > 0 then
+    glyph.set(treble, util.mapRange(glyph.audio.treble, 0, 1, 0, FULL))
+  end
+
+  -- A beat is a single frame: the pulse segments flash
+  -- full for one step, then back to the spectrum. On a
+  -- phone with no pulse segments the flash is skipped
+  -- rather than drawn, because an empty list blanks the
+  -- whole phone.
+  if glyph.audio.beat and #glyph.ch.pulse > 0 then
+    glyph.set(glyph.ch.pulse, FULL, 90)
+  else
+    glyph.hold(33)
+  end
+
+  -- Silence is not an error. With no capture the values
+  -- are all zero, so the strip rests dark, and the wait
+  -- is longer so an idle phone is not a flicker.
+  if not glyph.audio.active then
+    glyph.hold(60)
+  end
+end
+
+glyph.off(200)

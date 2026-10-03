@@ -1,0 +1,107 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Fuel Gauge
+-- id: fuel-gauge
+-- author: hardWorker254
+-- license: MIT
+-- description: The charge as a gauge, percent and charging and the module's own level and bar
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- `glyph.battery`, the module, is the charge as a
+-- script sees it: `percent` and `charging` are live
+-- values, `level()` is the percentage translated into
+-- *this phone's* segment count, and `bar(ms)` draws it.
+
+local battery = require("glyph.battery")
+
+local strip = glyph.ch.c
+local n = #strip
+if n == 0 then return end
+
+local FULL = glyph.MAX
+
+print("battery: " .. battery.percent .. "%"
+  .. (battery.charging and ", charging" or ", on battery"))
+
+-- The module's own bar, drawn at the speed a gauge
+-- should be read at. `bar` is a function because it
+-- takes the duration; `percent` is a value because it
+-- takes nothing.
+battery.bar(2200)
+
+-- The same reading by hand: `level()` answers how many
+-- of *this phone's* segments that is, so the same
+-- percentage is one segment on a Phone (1) and six on a
+-- Phone (2a).
+local lit = battery.level()
+print("lit segments on this phone: " .. lit .. " of " .. n)
+
+for i = 1, n do
+  if i <= lit then
+    glyph.set({ strip[i] }, FULL)
+  else
+    glyph.set({ strip[i] }, 0)
+  end
+end
+
+-- Every accent the phone has, collected once: `d` and
+-- `e` are empty tables on the models without them, and
+-- lighting an empty list blanks the whole phone.
+local accents = {}
+for _, group in ipairs({ glyph.ch.a, glyph.ch.b, glyph.ch.d, glyph.ch.e }) do
+  for _, channel in ipairs(group) do accents[#accents + 1] = channel end
+end
+
+if glyph.device == "PHONE1" then
+  -- Four segments: a quarter of the tank is one segment,
+  -- so a low warning is coarse, and the eleven accents
+  -- echo the level instead, at the percentage they hold.
+  glyph.hold(1000)
+  if battery.percent <= 25 and #accents > 0 then
+    glyph.set(accents, math.floor(FULL * battery.percent / 100), 500)
+  end
+  glyph.off(300)
+
+elseif glyph.device == "PHONE2" then
+  -- Sixteen segments and twelve accents: the gauge
+  -- resolves to a segment and a half, and the accents
+  -- carry a second gauge of their own, at their own
+  -- count.
+  glyph.hold(1000)
+  local alit = math.floor((battery.percent / 100) * #accents)
+  for i = 1, #accents do
+    if i <= alit then
+      glyph.set({ accents[i] }, FULL)
+    else
+      glyph.set({ accents[i] }, 0)
+    end
+  end
+  glyph.hold(600)
+  glyph.off(300)
+
+elseif glyph.device == "PHONE2A" then
+  -- Twenty-four segments: the finest gauge of the four,
+  -- a segment per four percent. A second, slower bar
+  -- pass makes the fill easy to read on the long strip.
+  glyph.hold(1000)
+  battery.bar(3000)
+  glyph.off(300)
+
+elseif glyph.device == "PHONE3A" then
+  -- Twenty segments and sixteen accents: the gauge is
+  -- drawn, then the accents walk in the fill's order,
+  -- one step per lit segment, as a confirmation.
+  glyph.hold(1000)
+  for i = 1, math.min(#accents, lit) do
+    glyph.set({ accents[i] }, FULL, 60)
+  end
+  glyph.off(300)
+
+else
+  -- A phone this build has never heard of: the
+  -- hand-drawn gauge on the C strip, and nothing else.
+  glyph.hold(1000)
+  glyph.off(300)
+end

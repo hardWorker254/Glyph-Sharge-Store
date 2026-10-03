@@ -1,0 +1,84 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Resting Beat
+-- id: resting-beat
+-- author: hardWorker254
+-- license: MIT
+-- description: A heartbeat that listens to the battery, slower as it drains, steadier on power
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- `heartbeat` is "lub-dub": a beat, a pause, a second
+-- beat, a longer recovery. The built-in animation plays
+-- it three times at one tempo; a script can let the
+-- phone decide the tempo, because `glyph.battery` and
+-- `glyph.charging` are values that read live, on every
+-- access.
+
+local FULL = glyph.MAX
+
+-- A resting heart slows as the battery drains: five
+-- beats at full charge, never fewer than two, because a
+-- heart that stops is an error message, not an
+-- animation.
+local beats = math.max(2, math.floor(glyph.battery / 20) + 1)
+
+-- On power the beat is confident: a short gap and full
+-- brightness. On battery the strip's own reserve sets
+-- the pace, and the light with it.
+local beatMs, gapMs, level
+if glyph.charging then
+  beatMs, gapMs, level = 180, 90, FULL
+else
+  beatMs = 260 - math.min(120, glyph.battery)
+  gapMs = 140
+  level = 1800
+end
+
+if glyph.device == "PHONE1" then
+  -- The pulse group here is A, B and E: the dub
+  -- answers the lub from the other side of the phone,
+  -- the E segment first and the A after it.
+  glyph.heartbeat(beats, beatMs, gapMs, level)
+  glyph.pulse(glyph.ch.e, 150, 200, 1200)
+  glyph.pulse(glyph.ch.a, 150, 200, 1500)
+  glyph.off(250)
+
+elseif glyph.device == "PHONE2" then
+  -- Two A segments beside one B and one E: the dub is
+  -- brighter, and the two A segments answer as one
+  -- while the E follows.
+  glyph.heartbeat(beats, beatMs, gapMs, level)
+  glyph.pulse(glyph.ch.a, 150, 200, 1800)
+  glyph.pulse(glyph.ch.e, 150, 200, 1500)
+  glyph.off(250)
+
+elseif glyph.device == "PHONE2A" then
+  -- No E, no D: the pulse group is A and B alone, so
+  -- the dub is the accents themselves, A first and B
+  -- after it.
+  glyph.heartbeat(beats, beatMs, gapMs, level)
+  glyph.pulse(glyph.ch.a, 150, 200, 1500)
+  glyph.pulse(glyph.ch.b, 150, 200, 1200)
+  glyph.off(250)
+
+elseif glyph.device == "PHONE3A" then
+  -- Eleven A and five B: the A strip is the dub, and
+  -- the B group answers once, dimmer, because it is
+  -- the shorter accent.
+  glyph.heartbeat(beats, beatMs, gapMs, level)
+  glyph.pulse(glyph.ch.a, 150, 200, 1500)
+  glyph.pulse(glyph.ch.b, 150, 200, 1200)
+  glyph.off(250)
+
+else
+  -- A phone this build has never heard of: the beat the
+  -- battery asked for, and a dub on whatever pulse
+  -- segments exist, if any.
+  glyph.heartbeat(beats, beatMs, gapMs, level)
+  if #glyph.ch.pulse > 0 then
+    glyph.pulse(glyph.ch.pulse, 150, 200, 1200)
+  end
+  glyph.off(250)
+end

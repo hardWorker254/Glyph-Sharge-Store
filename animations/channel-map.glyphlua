@@ -1,0 +1,106 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Channel Map
+-- id: channel-map
+-- author: hardWorker254
+-- license: MIT
+-- description: Every channel group on this phone, lit in turn and counted in the console
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- The groups come from the phone's own profile, so one
+-- script lights the right channels on every model
+-- without a single hard-coded channel number. This
+-- walkthrough visits each one and counts it while it
+-- goes there, because `print` reaches the studio
+-- console, not stdout.
+
+local DIM, MID, FULL = 400, 1800, glyph.MAX
+
+-- One stop on the map: say where, light it, wait, go
+-- dark. A group that does not exist on this phone
+-- answers "none" instead of being drawn, because
+-- lighting an empty list blanks the whole phone.
+local function visit(name, label, level)
+  local channels = glyph.group(name)
+  if channels and #channels > 0 then
+    print(glyph.device .. ": " .. label .. ", " .. #channels .. " channel(s)")
+    glyph.set(channels, level, 500)
+  else
+    print(glyph.device .. ": " .. label .. ", none on this phone")
+  end
+  glyph.off(120)
+end
+
+-- The composite views, the same on every phone: every
+-- channel but the C strip, the segments the pulse
+-- animations use, and the path the spiral walks.
+local function closeMap()
+  visit("nonC", "everything but C", MID)
+  visit("pulse", "the pulse segments", FULL)
+  visit("spiral", "the spiral order", MID)
+end
+
+if glyph.device == "PHONE1" then
+  -- The phone's own order, C first: A, B and E are
+  -- single segments beside the four-segment strip, and
+  -- the eight segments of D close the physical map.
+  visit("c", "the C strip", FULL)
+  visit("a", "the A accent", MID)
+  visit("b", "the B accent", MID)
+  visit("e", "the E accent", DIM)
+  visit("d", "the D strip", DIM)
+  closeMap()
+
+elseif glyph.device == "PHONE2" then
+  -- The same physical order as a Phone (1), A, B, C,
+  -- E, D, with the composite views last, because this
+  -- is the only phone whose `all` holds channels no
+  -- other group names.
+  visit("c", "the C strip", FULL)
+  visit("a", "the A accent", MID)
+  visit("b", "the B accent", MID)
+  visit("e", "the E accent", DIM)
+  visit("d", "the D strip", DIM)
+  closeMap()
+  print(glyph.device .. ": all, " .. #glyph.ch.all
+    .. " channel(s), five of them unnamed by any group")
+
+elseif glyph.device == "PHONE2A" then
+  -- C, B, A: the accent pair closes the strip, so the
+  -- map reads the long strip first and the two single
+  -- segments after it. No D and no E, and the map
+  -- says so.
+  visit("c", "the C strip", FULL)
+  visit("b", "the B accent", MID)
+  visit("a", "the A accent", MID)
+  closeMap()
+
+elseif glyph.device == "PHONE3A" then
+  -- C, A, B: the eleven A segments sit between the
+  -- strip and the five B, so the map reads them in
+  -- that order, and the accents are the longest stops
+  -- of the four.
+  visit("c", "the C strip", FULL)
+  visit("a", "the A accent", MID)
+  visit("b", "the B accent", MID)
+  closeMap()
+
+else
+  -- A phone this build has never heard of: the map
+  -- asks every group in turn, and the ones that do
+  -- not exist answer "none" instead of blanking the
+  -- strip.
+  visit("c", "the C strip", FULL)
+  visit("a", "the A accent", MID)
+  visit("b", "the B accent", MID)
+  visit("d", "the D strip", DIM)
+  visit("e", "the E accent", DIM)
+  closeMap()
+end
+
+-- And the whole phone, once, to close the map.
+print(glyph.device .. ": all, " .. #glyph.ch.all .. " channel(s)")
+glyph.setAll(FULL, 600)
+glyph.off(300)

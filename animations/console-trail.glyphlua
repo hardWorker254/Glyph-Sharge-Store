@@ -1,0 +1,58 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Console Trail
+-- id: console-trail
+-- author: hardWorker254
+-- license: MIT
+-- description: A script that narrates itself, print and glyph.log and the glyph.log severities and an early exit
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- The console is a script's window on the world: `print`
+-- and `glyph.log` write a line, and the `glyph.log`
+-- module writes one with a severity, `info`, `warn`,
+-- and `error`, which stops the run as well as writing.
+-- The module, not the table: `glyph.log` is a function,
+-- so `glyph.log.info` would be indexing a function.
+
+local log = require("glyph.log")
+
+local MID = 1800
+
+local strip = glyph.ch.c
+local n = #strip
+if n == 0 then return end
+
+print("a plain line, from print")
+glyph.log("a plain line, from glyph.log")
+
+log.info("info: the run is going to plan")
+log.warn("warn: nothing is wrong, but look here")
+
+-- The run state, read live and reported: this is the
+-- whole reason a script talks at all. A boolean cannot
+-- be glued to a string, so it goes through tostring.
+print("device: " .. glyph.device)
+print("battery: " .. glyph.battery .. ", charging: " .. tostring(glyph.charging))
+print("elapsed so far: " .. glyph.elapsed() .. " ms, frame " .. glyph.frame())
+
+-- A closing flourish, so the strip has something to
+-- show when the narration ends: one pass along the
+-- strip at the middle level, paced by its length.
+local s = math.max(30, math.floor(320 / n))
+for i = 1, n do
+  glyph.set({ strip[i] }, MID, s)
+end
+
+-- `exit` ends the run successfully, right now: a normal
+-- ending rather than a kill. Everything after it never
+-- runs, which is the point, because the console shows
+-- the lines and the error below stays unread.
+glyph.exit()
+
+-- Unreachable on purpose. `log.error` writes its line
+-- and stops the run, so a demo of it would end the
+-- demo; the line is here to show what an error line
+-- looks like, never to run.
+log.error("error: this never runs")

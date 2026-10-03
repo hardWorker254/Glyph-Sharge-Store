@@ -1,0 +1,119 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Shake Reply
+-- id: shake-reply
+-- author: hardWorker254
+-- license: MIT
+-- description: A strip that answers movement, magnitude drives the light and a shake is a flash
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- The accelerometer, one sample at a time: `x`, `y` and
+-- `z` are the axes in m/s² with gravity included,
+-- `magnitude` is how hard whatever the direction, and
+-- `shaken` is true on the sample that passed the shake
+-- threshold. The listener starts on the first read, not
+-- on the require, because a script that never asks is a
+-- script that never wakes the sensor.
+
+local sensor = require("glyph.sensor")
+
+local strip = glyph.ch.c
+local n = #strip
+if n == 0 then return end
+
+local FULL = glyph.MAX
+
+-- Gravity is included in the sample, so a phone lying
+-- still reads about 9.8: the floor, not zero. The
+-- strength is how far above the floor the sample is, as
+-- a fraction of it.
+local function strength()
+  return math.max(0, (sensor.magnitude - 9.8) / 9.8)
+end
+
+-- A loop that runs until the animation is stopped:
+-- `running` is the value that goes false when the user
+-- presses Stop, and reading it without parentheses is
+-- what makes the loop end. A function there would be
+-- truthy forever, and the run would end at the
+-- watchdog's limit instead.
+while glyph.running do
+  local power = strength()
+  local level = math.min(FULL, power * FULL)
+
+  -- The harder the motion, the more of the strip
+  -- answers. A phone at rest holds the strip dark; a
+  -- wave of the hand lights it from the far end.
+  local lit = math.floor(math.min(1, power) * n + 0.5)
+  for i = 1, n do
+    if i <= lit then
+      glyph.set({ strip[i] }, level)
+    else
+      glyph.set({ strip[i] }, 0)
+    end
+  end
+
+  if glyph.device == "PHONE1" then
+    -- The D strip is the long voice on this phone, so
+    -- it answers at half the level: the C strip leads,
+    -- the D strip follows, and the E segment, the
+    -- phone's smallest light, flashes on a shake.
+    for i = 1, #glyph.ch.d do
+      glyph.set({ glyph.ch.d[i] }, math.floor(level / 2))
+    end
+    if sensor.shaken then
+      glyph.set(glyph.ch.e, FULL, 120)
+    end
+
+  elseif glyph.device == "PHONE2" then
+    -- Two A segments beside sixteen C: the accents hold
+    -- the level steady while the strip moves, and a
+    -- shake flashes the E segment.
+    glyph.set(glyph.ch.a, math.floor(level / 2))
+    if sensor.shaken then
+      glyph.set(glyph.ch.e, FULL, 120)
+    end
+
+  elseif glyph.device == "PHONE2A" then
+    -- No D, no E: the two accent segments are the whole
+    -- answer beside the strip, and a shake flashes both
+    -- of them, the B segment last.
+    glyph.set(glyph.ch.a, math.floor(level / 2))
+    glyph.set(glyph.ch.b, math.floor(level / 2))
+    if sensor.shaken then
+      glyph.set(glyph.ch.b, FULL, 120)
+    end
+
+  elseif glyph.device == "PHONE3A" then
+    -- Eleven A and five B: the A strip answers at half
+    -- the level because it is long enough to carry one,
+    -- and a shake flashes the B group, the phone's
+    -- brightest accent.
+    glyph.set(glyph.ch.a, math.floor(level / 2))
+    if sensor.shaken then
+      glyph.set(glyph.ch.b, FULL, 120)
+    end
+
+  else
+    -- A phone this build has never heard of: the C
+    -- strip alone, and a shake flashes whatever pulse
+    -- segments exist.
+    if sensor.shaken and #glyph.ch.pulse > 0 then
+      glyph.set(glyph.ch.pulse, FULL, 120)
+    end
+  end
+
+  -- A shake is a single sample: `shaken` is only true
+  -- on the frame that crossed the threshold, so the
+  -- flash cannot stick.
+  if sensor.shaken then
+    print("shaken: " .. string.format("%.1f", sensor.magnitude) .. " m/s²")
+    glyph.hold(120)
+  else
+    glyph.hold(40)
+  end
+end
+
+glyph.off(200)

@@ -1,0 +1,109 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Day Cycle
+-- id: day-cycle
+-- author: hardWorker254
+-- license: MIT
+-- description: The strip's brightness follows the wall clock, day and dusk and night from glyph.time
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- The wall clock: `hour`, `minute`, `minuteOfDay` and
+-- `isNight`, all live values in the phone's own time
+-- zone, plus the three levels a day has: `DAY` at full,
+-- `DUSK` at half, and `NIGHT` at dark.
+
+local time = require("glyph.time")
+local util = require("glyph.util")
+
+local strip = glyph.ch.c
+local n = #strip
+if n == 0 then return end
+
+-- The level of the hour, in the module's own units.
+-- `isNight` owns the whole night, ten in the evening to
+-- six in the morning, so the order of the tests is the
+-- whole logic.
+local level = time.DAY
+if time.hour >= 12 then level = time.DUSK end
+if time.isNight then level = time.NIGHT end
+
+print("it is " .. time.hour .. ":" .. string.format("%02d", time.minute)
+  .. ", minute " .. time.minuteOfDay .. " of the day")
+
+-- At night the strip stays dark, and a script that has
+-- nothing to show should say so and stop rather than
+-- draw a black frame.
+if level == time.NIGHT then
+  print("night: the strip stays dark")
+  glyph.off()
+  return
+end
+
+-- Every accent the phone has, collected once: `d` and
+-- `e` are empty tables on the models without them, and
+-- lighting an empty list blanks the whole phone.
+local accents = {}
+for _, group in ipairs({ glyph.ch.a, glyph.ch.b, glyph.ch.d, glyph.ch.e }) do
+  for _, channel in ipairs(group) do accents[#accents + 1] = channel end
+end
+
+-- A ramp along the strip at the hour's level: the far
+-- end dim, the near end at the level of the hour.
+-- `lerp` holds its third argument to 0..1, so the ramp
+-- cannot overshoot.
+local function ramp(step)
+  for i = 1, n do
+    glyph.set({ strip[i] }, util.lerp(200, level, i / n), step)
+  end
+end
+
+if glyph.device == "PHONE1" then
+  -- Four segments at day or dusk: the ramp is one
+  -- segment per step, and the eleven accents hold the
+  -- hour's level beside it, because on a short strip
+  -- the accents are the detail.
+  local s = 110
+  ramp(s)
+  if #accents > 0 then glyph.set(accents, level, s * 2) end
+  glyph.off(400)
+
+elseif glyph.device == "PHONE2" then
+  -- Sixteen segments: the ramp has room to breathe, and
+  -- the twelve accents walk the same level afterwards,
+  -- so the reading is confirmed twice.
+  local s = 55
+  ramp(s)
+  for i = 1, #accents do
+    glyph.set({ accents[i] }, level, 40)
+  end
+  glyph.off(400)
+
+elseif glyph.device == "PHONE2A" then
+  -- Twenty-four segments and only two accents: the ramp
+  -- is the whole story, slow enough to read on the
+  -- longest strip of the four.
+  local s = 35
+  ramp(s)
+  if #accents > 0 then glyph.set(accents, level, s * 2) end
+  glyph.off(400)
+
+elseif glyph.device == "PHONE3A" then
+  -- Twenty segments beside sixteen accents: the ramp,
+  -- then the accents at the dusk level even at day, a
+  -- dimmer second voice, because the accents outnumber
+  -- the strip's steps.
+  local s = 40
+  ramp(s)
+  if #accents > 0 then glyph.set(accents, time.DUSK, s * 2) end
+  glyph.off(400)
+
+else
+  -- A phone this build has never heard of: the ramp at
+  -- the hour's level, paced by the strip it reports.
+  local s = math.max(30, math.floor(300 / n))
+  ramp(s)
+  if #accents > 0 then glyph.set(accents, level, s * 2) end
+  glyph.off(400)
+end

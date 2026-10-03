@@ -3,12 +3,236 @@
   "updated": 1712345678000,
   "items": [
     {
+      "id": "channel-map",
+      "name": "Channel Map",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "Every channel group on this phone, lit in turn and counted in the console",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/channel-map.glyphlua",
+      "sha256": "b525532220ecbc076213d781199a7c95f722ff94fd0e31a7081173649037afcf"
+    },
+    {
+      "id": "comet",
+      "name": "Spiral Comet",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "A comet with an eased tail, travelling the spiral order segment by segment",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/comet.glyphlua",
+      "sha256": "49538ffac2da1395b35ddd9622e3a935ec13bcf84ae86de37989146f166cf9aa"
+    },
+    {
+      "id": "console-trail",
+      "name": "Console Trail",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "A script that narrates itself, print and glyph.log and the glyph.log severities and an early exit",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/console-trail.glyphlua",
+      "sha256": "47f8ca1d1d6cb759cfb4163cc6fc822378dd760367505486b108d01880803b28"
+    },
+    {
+      "id": "day-cycle",
+      "name": "Day Cycle",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "The strip's brightness follows the wall clock, day and dusk and night from glyph.time",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/day-cycle.glyphlua",
+      "sha256": "c06a28dc2bc9e33a456d575e9394bbe2e12035f553639f3b3e9c373d9f4b77d2"
+    },
+    {
+      "id": "drawing",
+      "name": "Drawing Primer",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "The four basic calls, set and setAll and off and hold, in one study of levels",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/drawing.glyphlua",
+      "sha256": "eca262f30f00a5a780d5cd340f3c4974c2c6ff6df26cd026a14c246dbde3ece3"
+    },
+    {
+      "id": "fireflies",
+      "name": "Fireflies",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "Seeded random twinkles, each on its own eased curve, rnd and rndFloat and seed and ease",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/fireflies.glyphlua",
+      "sha256": "fc99c245da0f1ecfb2ace3e28ba9d593446ad9be3f1fa79c8f25b1111234612e"
+    },
+    {
+      "id": "fuel-gauge",
+      "name": "Fuel Gauge",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "The charge as a gauge, percent and charging and the module's own level and bar",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/fuel-gauge.glyphlua",
+      "sha256": "715c45c3d16ebf248e94345efe3b0a26c26ca51abfdc31adb77f4379b593a774"
+    },
+    {
+      "id": "pulse-dot",
+      "name": "Pulse Dot",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "One walking, pulsing dot and a counted whole-strip blink, pulse and blinkAll",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/pulse-dot.glyphlua",
+      "sha256": "b2fb68deefd53d9668160baa9df9dc19a2cec34dbf86108c8a79e0698d14500a"
+    },
+    {
+      "id": "ramps",
+      "name": "Ramps",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "Smooth ramps by hand, clamp and lerp and mapRange and a shuffled chase order",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/ramps.glyphlua",
+      "sha256": "e137908ed3d71531efe9b1ea2236a317978abcfad3d91fa836397fd61e8c4131"
+    },
+    {
+      "id": "resting-beat",
+      "name": "Resting Beat",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "A heartbeat that listens to the battery, slower as it drains, steadier on power",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/resting-beat.glyphlua",
+      "sha256": "ec4557facbab244aec04f533ce132b42d61fa21f3d8891e6799a4bafff35b415"
+    },
+    {
+      "id": "shake-reply",
+      "name": "Shake Reply",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "A strip that answers movement, magnitude drives the light and a shake is a flash",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/shake-reply.glyphlua",
+      "sha256": "c79903662a4d6e0bcc30b0dc98e42868c4955bcb7d13c9f6542ea86506c5d360"
+    },
+    {
+      "id": "signal-check",
+      "name": "Signal Check",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "The network state as light, connected and wifi and metered and vpn from glyph.net",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/signal-check.glyphlua",
+      "sha256": "7bdd12f46edcdcf74c3c6e2fc64f51da89519db7790e350a0147e50cd9d4bf6f"
+    },
+    {
+      "id": "spectrum",
+      "name": "Spectrum Studio",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "The spectrum split three ways, bass and mid and treble on their own groups, with a beat flash",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/spectrum.glyphlua",
+      "sha256": "bdbb00c426a6af50ed9a641dd9488db3acbf8673a34e00e245e90409359d8da2"
+    },
+    {
+      "id": "sweep",
+      "name": "Sweep Pass",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "Progressive passes over every group, forward and in reverse, the sweep call",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/sweep.glyphlua",
+      "sha256": "f50f5064a11ebb1174c923c15c50df77a1d14055303c86a3acc7d11d45629c9e"
+    },
+    {
       "id": "wave",
       "name": "Wave",
       "author": "hardWorker254",
       "license": "MIT",
       "description": "A travelling wave, written separately for each phone's strip",
-      "version": 2,
+      "version": 1,
       "devices": [
         "PHONE1",
         "PHONE2",

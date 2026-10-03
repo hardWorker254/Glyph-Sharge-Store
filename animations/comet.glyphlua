@@ -1,0 +1,83 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Spiral Comet
+-- id: comet
+-- author: hardWorker254
+-- license: MIT
+-- description: A comet with an eased tail, travelling the spiral order segment by segment
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- The spiral order is the path the phone's own spiral animation
+-- walks: a channel *list* like any other, so a script can
+-- travel it by its own rules instead of the built-in pass.
+-- Here a comet goes along it, its tail fading on an `inout`
+-- curve rather than linearly, because `ease` is what makes a
+-- comet a comet.
+
+local FULL = glyph.MAX
+
+local order = glyph.ch.spiral
+local n = #order
+if n == 0 then return end
+
+-- One frame of the comet: the head at full, each tail segment
+-- on the curve that maps its distance from the head onto a
+-- brightness. The tail is drawn, not travelled: every segment
+-- of it is lit at once, and `off` erases the whole frame.
+local function comet(head, tail)
+  for j = 0, tail do
+    local i = head - j
+    if i >= 1 then
+      local t = 1 - (j / tail)
+      glyph.set({ order[i] }, FULL * glyph.ease(t, "inout"))
+    end
+  end
+end
+
+-- The whole path, one frame per step.
+local function travel(tail, s)
+  for head = 1, n do
+    comet(head, tail)
+    glyph.off(s)
+  end
+end
+
+if glyph.device == "PHONE1" then
+  -- Fourteen channels in spiral order, E first and D last. The
+  -- tail is two segments, the most a four-segment C strip can
+  -- spare and still read as a tail, and the pace is slow
+  -- because the whole path is short.
+  travel(2, 40)
+  glyph.off(300)
+
+elseif glyph.device == "PHONE2" then
+  -- Thirty-three channels, the longest path of the four: the
+  -- second C run rides along inside `spiral` though no other
+  -- group names it. A five-segment tail and a quick step.
+  travel(5, 16)
+  glyph.off(300)
+
+elseif glyph.device == "PHONE2A" then
+  -- Twenty-six channels, A first and C last: the comet crosses
+  -- the accents before the long strip. A four-segment tail.
+  travel(4, 21)
+  glyph.off(300)
+
+elseif glyph.device == "PHONE3A" then
+  -- Thirty-six channels, A first and C last, with the widest
+  -- tail of the four: six segments, and the fastest step,
+  -- because there is the most path to cross.
+  travel(6, 15)
+  glyph.off(300)
+
+else
+  -- A phone this build has never heard of: the tail and the
+  -- pace derived from the path it reports, so the comet is
+  -- readable whatever the layout.
+  local tail = math.max(2, math.floor(n / 6))
+  local s = math.max(15, math.floor(560 / n))
+  travel(tail, s)
+  glyph.off(300)
+end

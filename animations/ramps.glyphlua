@@ -1,0 +1,129 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Ramps
+-- id: ramps
+-- author: hardWorker254
+-- license: MIT
+-- description: Smooth ramps by hand, clamp and lerp and mapRange and a shuffled chase order
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- `glyph.util` is the arithmetic a script would
+-- otherwise write out, and the reason it is a module
+-- rather than more functions: it is all pure, no
+-- drawing, no waiting, nothing that can end a run, so
+-- it is safe in the tightest loop.
+
+local util = require("glyph.util")
+
+local strip = glyph.ch.c
+local n = #strip
+if n == 0 then return end
+
+local DIM, FULL = 400, glyph.MAX
+
+-- The step is derived from the length so the same
+-- script reads at the same speed on four segments or
+-- twenty-four.
+local s = math.max(25, math.floor(400 / n))
+
+-- `lerp(a, b, t)`: how far along a to b the position t
+-- is. A ramp along the strip, out and back.
+local function ramp(direction)
+  for i = 1, n do
+    local t = i / n
+    if direction then t = 1 - t end
+    glyph.set({ strip[i] }, util.lerp(DIM, FULL, t), s)
+  end
+  glyph.hold(s)
+end
+
+-- `mapRange(v, inLo, inHi, outLo, outHi)`: a value
+-- from one range onto another. The brightness of each
+-- segment mapped from its position, inverted, so the
+-- near end of the strip is dark and the far end bright,
+-- the mirror of the first ramp.
+local function mirror()
+  for i = 1, n do
+    glyph.set({ strip[i] }, util.mapRange(i, 1, n, FULL, DIM), s)
+  end
+  glyph.hold(s * 2)
+end
+
+-- `clamp(v, lo, hi)`: a value held inside its bounds.
+-- A reversed pair is swapped rather than rejected, so a
+-- script's mistake survives as the clamp it probably
+-- meant.
+local overshoot = util.clamp(FULL * 1.5, 0, FULL)
+local undershoot = util.clamp(-100, 0, FULL)
+print("clamped: " .. overshoot .. " and " .. undershoot)
+
+-- `shuffle(t)`: a shuffled *copy*, so the group it
+-- came from is untouched for the next loop.
+local order = util.shuffle(strip)
+
+-- A chase in the shuffled order, which is what keeps a
+-- long walk from being a plain sweep.
+local function chase()
+  for i = 1, #order do
+    glyph.set({ order[i] }, FULL, s * 2)
+  end
+end
+
+if glyph.device == "PHONE1" then
+  -- Four segments: the ramps are the whole
+  -- demonstration, and the shuffled chase is four
+  -- steps, quick and over before the eye can predict
+  -- it.
+  ramp(false)
+  ramp(true)
+  mirror()
+  chase()
+  glyph.off(300)
+
+elseif glyph.device == "PHONE2" then
+  -- Sixteen segments: the ramps, the mirror, and a
+  -- chase long enough to be a walk rather than a
+  -- flicker, with the seventeen channels of `nonC`
+  -- joining the last step of it.
+  ramp(false)
+  ramp(true)
+  mirror()
+  chase()
+  glyph.set(glyph.ch.nonC, MID, s * 2)
+  glyph.off(300)
+
+elseif glyph.device == "PHONE2A" then
+  -- Twenty-four segments: the longest ramp of the four,
+  -- twice over, and a chase that takes its time.
+  ramp(false)
+  mirror()
+  ramp(true)
+  mirror()
+  chase()
+  glyph.off(300)
+
+elseif glyph.device == "PHONE3A" then
+  -- Twenty segments beside sixteen accents: the ramps on
+  -- the strip, then the same lerp on the A strip,
+  -- mapped from its own range, so the accents echo the
+  -- ramp at their own length.
+  ramp(false)
+  ramp(true)
+  mirror()
+  for i = 1, #glyph.ch.a do
+    glyph.set({ glyph.ch.a[i] }, util.lerp(DIM, FULL, i / #glyph.ch.a), s * 2)
+  end
+  chase()
+  glyph.off(300)
+
+else
+  -- A phone this build has never heard of: the ramps
+  -- and the chase, paced by the strip it reports.
+  ramp(false)
+  ramp(true)
+  mirror()
+  chase()
+  glyph.off(300)
+end

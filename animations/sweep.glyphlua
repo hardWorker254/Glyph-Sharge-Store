@@ -1,0 +1,84 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Sweep Pass
+-- id: sweep
+-- author: hardWorker254
+-- license: MIT
+-- description: Progressive passes over every group, forward and in reverse, the sweep call
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- `sweep` lights one channel, then two, then three, to the end
+-- of the list, and blanks once at the end. The fourth argument
+-- walks it backwards. It is the progressive pass: a ramp that
+-- accumulates rather than travels.
+
+local DIM, MID, FULL = 400, 1800, glyph.MAX
+
+local strip = glyph.ch.c
+local n = #strip
+if n == 0 then return end
+
+-- A step per group, not per phone: the accent groups of a
+-- Phone (2a) are two channels long, and a step tuned for a
+-- twenty-four-segment strip would make them a single flicker.
+local function stepFor(size)
+  return math.max(25, math.floor(500 / size))
+end
+
+-- One group, both directions. `false` is what the call does
+-- without the fourth argument; it is named here because a
+-- sweep that depends on its defaults is a sweep nobody tuned.
+local function bothWays(channels, level)
+  local s = stepFor(#channels)
+  glyph.sweep(channels, s, level, false)
+  glyph.sweep(channels, s, level, true)
+end
+
+if glyph.device == "PHONE1" then
+  -- Four C segments, and eleven accents in three groups: the
+  -- D strip is the longest voice after the C, so it gets the
+  -- dim level and the single-segment groups the middle one.
+  bothWays(strip, FULL)
+  bothWays(glyph.ch.d, DIM)
+  bothWays(glyph.ch.a, MID)
+  bothWays(glyph.ch.b, MID)
+  bothWays(glyph.ch.e, MID)
+  glyph.off(250)
+
+elseif glyph.device == "PHONE2" then
+  -- Sixteen C segments, and the only phone with a second C
+  -- run: five channels that `all` names and no other group
+  -- does. The sweep reaches them through `all` alone, and
+  -- `nonC` holds them beside the accents.
+  bothWays(strip, FULL)
+  bothWays(glyph.ch.nonC, MID)
+  glyph.sweep(glyph.ch.all, stepFor(#glyph.ch.all), DIM, false)
+  glyph.off(250)
+
+elseif glyph.device == "PHONE2A" then
+  -- The longest strip of the four beside the shortest accent
+  -- list, two channels one segment each. The C sweep is the
+  -- whole animation; the pair is a coda.
+  bothWays(strip, FULL)
+  bothWays(glyph.ch.nonC, MID)
+  glyph.off(250)
+
+elseif glyph.device == "PHONE3A" then
+  -- Twenty C segments and sixteen accents in two groups, long
+  -- enough each to be worth a pass of its own: A at the
+  -- middle level, B dimmer, as the B group is the shorter of
+  -- the two.
+  bothWays(strip, FULL)
+  bothWays(glyph.ch.a, MID)
+  bothWays(glyph.ch.b, DIM)
+  glyph.off(250)
+
+else
+  -- A phone this build has never heard of: the C strip and
+  -- whatever is not it, both ways, at two levels.
+  bothWays(strip, FULL)
+  bothWays(glyph.ch.nonC, MID)
+  glyph.off(250)
+end

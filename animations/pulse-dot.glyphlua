@@ -1,0 +1,100 @@
+-- Glyph Sharge animation
+-- format: 1
+-- name: Pulse Dot
+-- id: pulse-dot
+-- author: hardWorker254
+-- license: MIT
+-- description: One walking, pulsing dot and a counted whole-strip blink, pulse and blinkAll
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1712345678000
+-- updated: 1712345678000
+
+-- `pulse` lights its channels, blanks the whole phone, then
+-- pauses: a dot that exists only for a moment. `blinkAll` is
+-- the same idea with no channel list at all: every channel, on,
+-- off, pause, and a count. Together they are the whole
+-- vocabulary of a blink.
+
+local DIM, MID, FULL = 400, 1800, glyph.MAX
+
+local strip = glyph.ch.c
+local n = #strip
+if n == 0 then return end
+
+-- The step shrinks as the strip grows, for the same reason the
+-- wave's does: four segments cannot carry a fast walk, and
+-- twenty-four turn the same pause into a crawl.
+local function stepFor(size)
+  return math.max(35, math.floor(460 / size))
+end
+
+-- A dot that walks the strip and pulses at every stop.
+local function walk(step, level)
+  for i = 1, n do
+    glyph.pulse({ strip[i] }, step, step, level)
+  end
+end
+
+-- The walk back, dimmer, one segment at a time.
+local function walkBack(step, level)
+  for i = n, 1, -1 do
+    glyph.pulse({ strip[i] }, step, step, level)
+  end
+end
+
+if glyph.device == "PHONE1" then
+  -- Four segments: the walk is the whole phone in four beats,
+  -- so the dot pauses longer at each stop and the closing
+  -- blink is short.
+  local s = stepFor(n)
+  walk(s, FULL)
+  walkBack(s, MID)
+  glyph.blinkAll(s, s, FULL, 2)
+  glyph.off(s * 2)
+
+elseif glyph.device == "PHONE2" then
+  -- Sixteen segments: a walk long enough to have a pace, and
+  -- the twelve accents get a pulse of their own between the
+  -- two directions, the two A segments and the B and the E.
+  local s = stepFor(n)
+  walk(s, FULL)
+  glyph.pulse(glyph.ch.a, s, s, MID)
+  glyph.pulse(glyph.ch.b, s, s, MID)
+  walkBack(s, DIM)
+  glyph.blinkAll(s, s, FULL, 3)
+  glyph.off(s * 2)
+
+elseif glyph.device == "PHONE2A" then
+  -- The longest strip of the four: the walk is a procession,
+  -- and the two accents cap it, one at each end of the count.
+  local s = stepFor(n)
+  walk(s, FULL)
+  glyph.pulse(glyph.ch.a, s, s, MID)
+  walkBack(s, MID)
+  glyph.pulse(glyph.ch.b, s, s, MID)
+  glyph.blinkAll(s, s, FULL, 3)
+  glyph.off(s * 2)
+
+elseif glyph.device == "PHONE3A" then
+  -- Twenty segments with sixteen accents beside them: the dot
+  -- walks the strip while the accents answer in pairs, one
+  -- pulse per direction, the eleven A segments before the five
+  -- B.
+  local s = stepFor(n)
+  walk(s, FULL)
+  glyph.pulse(glyph.ch.a, s, s, DIM)
+  glyph.pulse(glyph.ch.b, s, s, DIM)
+  walkBack(s, MID)
+  glyph.blinkAll(s, s, FULL, 4)
+  glyph.off(s * 2)
+
+else
+  -- A phone this build has never heard of: the plainest walk
+  -- there is, on the C strip alone, with the step derived
+  -- from its length.
+  local s = stepFor(n)
+  walk(s, FULL)
+  walkBack(s, MID)
+  glyph.blinkAll(s, s, FULL, 2)
+  glyph.off(s * 2)
+end
