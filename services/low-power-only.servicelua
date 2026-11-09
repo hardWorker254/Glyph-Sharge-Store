@@ -1,0 +1,29 @@
+-- Glyph Sharge service rule
+-- format: 1
+-- name: Low Power Only
+-- id: low-power-only
+-- author: hardWorker254
+-- license: MIT
+-- description: Plays the rule's animation on screen off only when the battery is low
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1773072000000
+-- updated: 1773072000000
+-- version: 1
+
+-- `glyph.battery` is live device state. Reading it asks
+-- for the "device state" permission once, when you install
+-- or save the rule — the app lists what the script reaches
+-- for and you decide. This script draws nothing itself; it
+-- only chooses whether to fire the animation you picked.
+
+local THRESHOLD = 20
+
+glyph.on("screen_off", function()
+  local level = glyph.battery
+  if level <= THRESHOLD then
+    glyph.log("battery at " .. level .. "% — playing")
+    glyph.playAnimation()
+  else
+    glyph.log("battery at " .. level .. "% — above " .. THRESHOLD .. "%, skipping")
+  end
+end)

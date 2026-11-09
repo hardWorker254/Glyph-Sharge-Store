@@ -1,9 +1,10 @@
 {
   "format": 1,
-  "updated": 1712345678000,
+  "updated": 1773072000000,
   "items": [
     {
       "id": "channel-map",
+      "type": "animation",
       "name": "Channel Map",
       "author": "hardWorker254",
       "license": "MIT",
@@ -19,7 +20,25 @@
       "sha256": "b525532220ecbc076213d781199a7c95f722ff94fd0e31a7081173649037afcf"
     },
     {
+      "id": "charge-edges",
+      "type": "service",
+      "name": "Charge Edges",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "Plays the rule's animation on both plug in and unplug",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/services/charge-edges.servicelua",
+      "sha256": "8a36c6936b27ba823d75092e853dfb4237b6bfa4be68b1605725e57c25e8ba33"
+    },
+    {
       "id": "comet",
+      "type": "animation",
       "name": "Spiral Comet",
       "author": "hardWorker254",
       "license": "MIT",
@@ -36,6 +55,7 @@
     },
     {
       "id": "console-trail",
+      "type": "animation",
       "name": "Console Trail",
       "author": "hardWorker254",
       "license": "MIT",
@@ -52,11 +72,12 @@
     },
     {
       "id": "day-cycle",
+      "type": "animation",
       "name": "Day Cycle",
       "author": "hardWorker254",
       "license": "MIT",
-      "description": "The strip's brightness follows the wall clock, day and dusk and night from glyph.time",
-      "version": 1,
+      "description": "The strip's brightness follows the wall clock, day and dusk and night",
+      "version": 2,
       "devices": [
         "PHONE1",
         "PHONE2",
@@ -64,10 +85,28 @@
         "PHONE3A"
       ],
       "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/animations/day-cycle.glyphlua",
-      "sha256": "c06a28dc2bc9e33a456d575e9394bbe2e12035f553639f3b3e9c373d9f4b77d2"
+      "sha256": "1092dcb378dc0681a1635319e41a5ef3c157e33772b29378bd556cf34b01786a"
+    },
+    {
+      "id": "daytime-shake",
+      "type": "service",
+      "name": "Daytime Shake",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "Answers a shake with the rule's animation during the day, stays quiet at night",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/services/daytime-shake.servicelua",
+      "sha256": "2a4609133850ab729a79de25976264ba6fe7ce8b8c950a35e6b7b1f6745ce0a7"
     },
     {
       "id": "drawing",
+      "type": "animation",
       "name": "Drawing Primer",
       "author": "hardWorker254",
       "license": "MIT",
@@ -84,6 +123,7 @@
     },
     {
       "id": "fireflies",
+      "type": "animation",
       "name": "Fireflies",
       "author": "hardWorker254",
       "license": "MIT",
@@ -100,6 +140,7 @@
     },
     {
       "id": "fuel-gauge",
+      "type": "animation",
       "name": "Fuel Gauge",
       "author": "hardWorker254",
       "license": "MIT",
@@ -115,7 +156,42 @@
       "sha256": "715c45c3d16ebf248e94345efe3b0a26c26ca51abfdc31adb77f4379b593a774"
     },
     {
+      "id": "low-power-only",
+      "type": "service",
+      "name": "Low Power Only",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "Plays the rule's animation on screen off only when the battery is low",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/services/low-power-only.servicelua",
+      "sha256": "0c3dc0080cd737a0702ea76bbf541f14353fd87887bd272a04c22f234e86f23d"
+    },
+    {
+      "id": "night-quiet",
+      "type": "service",
+      "name": "Night Quiet",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "Plays the rule's animation on screen off, but stays dark at night",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/services/night-quiet.servicelua",
+      "sha256": "bff871c0380b93fd6a240b6b1c1371538cf21126a3aca84f8c89b3f987486326"
+    },
+    {
       "id": "pulse-dot",
+      "type": "animation",
       "name": "Pulse Dot",
       "author": "hardWorker254",
       "license": "MIT",
@@ -132,6 +208,7 @@
     },
     {
       "id": "ramps",
+      "type": "animation",
       "name": "Ramps",
       "author": "hardWorker254",
       "license": "MIT",
@@ -148,6 +225,7 @@
     },
     {
       "id": "resting-beat",
+      "type": "animation",
       "name": "Resting Beat",
       "author": "hardWorker254",
       "license": "MIT",
@@ -164,6 +242,7 @@
     },
     {
       "id": "shake-reply",
+      "type": "animation",
       "name": "Shake Reply",
       "author": "hardWorker254",
       "license": "MIT",
@@ -180,6 +259,7 @@
     },
     {
       "id": "signal-check",
+      "type": "animation",
       "name": "Signal Check",
       "author": "hardWorker254",
       "license": "MIT",
@@ -196,6 +276,7 @@
     },
     {
       "id": "spectrum",
+      "type": "animation",
       "name": "Spectrum Studio",
       "author": "hardWorker254",
       "license": "MIT",
@@ -212,6 +293,7 @@
     },
     {
       "id": "sweep",
+      "type": "animation",
       "name": "Sweep Pass",
       "author": "hardWorker254",
       "license": "MIT",
@@ -227,7 +309,25 @@
       "sha256": "f50f5064a11ebb1174c923c15c50df77a1d14055303c86a3acc7d11d45629c9e"
     },
     {
+      "id": "unplug-reminder",
+      "type": "service",
+      "name": "Unplug Reminder",
+      "author": "hardWorker254",
+      "license": "MIT",
+      "description": "Plays the rule's animation when the charger is disconnected",
+      "version": 1,
+      "devices": [
+        "PHONE1",
+        "PHONE2",
+        "PHONE2A",
+        "PHONE3A"
+      ],
+      "url": "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store/refs/heads/main/services/unplug-reminder.servicelua",
+      "sha256": "cb10421e8638dc81a51b75231ad1edfde6faae4fca6dea3f3c91408286c8dab3"
+    },
+    {
       "id": "wave",
+      "type": "animation",
       "name": "Wave",
       "author": "hardWorker254",
       "license": "MIT",

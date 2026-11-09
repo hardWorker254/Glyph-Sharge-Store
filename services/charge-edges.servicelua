@@ -1,0 +1,24 @@
+-- Glyph Sharge service rule
+-- format: 1
+-- name: Charge Edges
+-- id: charge-edges
+-- author: hardWorker254
+-- license: MIT
+-- description: Plays the rule's animation on both plug in and unplug
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1773072000000
+-- updated: 1773072000000
+-- version: 1
+
+-- One service can listen to more than one trigger. File a
+-- handler for each: this rule answers both edges of the
+-- charger, so the same animation marks plugging in and
+-- pulling out.
+
+glyph.on("power_connected", function()
+  glyph.playAnimation()
+end)
+
+glyph.on("power_disconnected", function()
+  glyph.playAnimation()
+end)

@@ -1,0 +1,25 @@
+-- Glyph Sharge service rule
+-- format: 1
+-- name: Daytime Shake
+-- id: daytime-shake
+-- author: hardWorker254
+-- license: MIT
+-- description: Answers a shake with the rule's animation during the day, stays quiet at night
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1773072000000
+-- updated: 1773072000000
+-- version: 1
+
+-- The `shake` trigger fires when the phone is shaken hard
+-- enough. This handler adds a time-of-day guard on top of
+-- it: the same gesture that shows a peek by day does
+-- nothing at night, when the strip lighting up would be
+-- the opposite of what you want.
+
+glyph.on("shake", function()
+  if glyph.isNight then
+    return
+  end
+
+  glyph.playAnimation()
+end)

@@ -1,0 +1,28 @@
+-- Glyph Sharge service rule
+-- format: 1
+-- name: Night Quiet
+-- id: night-quiet
+-- author: hardWorker254
+-- license: MIT
+-- description: Plays the rule's animation on screen off, but stays dark at night
+-- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
+-- created: 1773072000000
+-- updated: 1773072000000
+-- version: 1
+
+-- A service says WHEN: it files a handler under a trigger
+-- and, when the trigger fires, asks the app to play the
+-- animation you picked for this rule.
+--
+-- This one reads the wall clock straight off `glyph` —
+-- no `require`, no permission — so it can stay quiet from
+-- 22:00 to 06:00 and answer the rest of the day.
+
+glyph.on("screen_off", function()
+  if glyph.isNight then
+    glyph.log("night (" .. glyph.hour .. ":00) — staying dark")
+    return
+  end
+
+  glyph.playAnimation()
+end)

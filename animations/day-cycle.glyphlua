@@ -4,17 +4,18 @@
 -- id: day-cycle
 -- author: hardWorker254
 -- license: MIT
--- description: The strip's brightness follows the wall clock, day and dusk and night from glyph.time
+-- description: The strip's brightness follows the wall clock, day and dusk and night
 -- devices: PHONE1,PHONE2,PHONE2A,PHONE3A
 -- created: 1712345678000
--- updated: 1712345678000
+-- updated: 1773072000000
+-- version: 2
 
--- The wall clock: `hour`, `minute`, `minuteOfDay` and
--- `isNight`, all live values in the phone's own time
--- zone, plus the three levels a day has: `DAY` at full,
--- `DUSK` at half, and `NIGHT` at dark.
+-- The wall clock reads straight off `glyph`: `hour`,
+-- `minute`, `minuteOfDay` and `isNight` are live in the
+-- phone's own time zone, plus the three levels a day has:
+-- `DAY` at full, `DUSK` at half, and `NIGHT` at dark.
+-- No `require` — the hour is just there.
 
-local time = require("glyph.time")
 local util = require("glyph.util")
 
 local strip = glyph.ch.c
@@ -25,17 +26,17 @@ if n == 0 then return end
 -- `isNight` owns the whole night, ten in the evening to
 -- six in the morning, so the order of the tests is the
 -- whole logic.
-local level = time.DAY
-if time.hour >= 12 then level = time.DUSK end
-if time.isNight then level = time.NIGHT end
+local level = glyph.DAY
+if glyph.hour >= 12 then level = glyph.DUSK end
+if glyph.isNight then level = glyph.NIGHT end
 
-print("it is " .. time.hour .. ":" .. string.format("%02d", time.minute)
-  .. ", minute " .. time.minuteOfDay .. " of the day")
+print("it is " .. glyph.hour .. ":" .. string.format("%02d", glyph.minute)
+  .. ", minute " .. glyph.minuteOfDay .. " of the day")
 
 -- At night the strip stays dark, and a script that has
 -- nothing to show should say so and stop rather than
 -- draw a black frame.
-if level == time.NIGHT then
+if level == glyph.NIGHT then
   print("night: the strip stays dark")
   glyph.off()
   return
@@ -96,7 +97,7 @@ elseif glyph.device == "PHONE3A" then
   -- the strip's steps.
   local s = 40
   ramp(s)
-  if #accents > 0 then glyph.set(accents, time.DUSK, s * 2) end
+  if #accents > 0 then glyph.set(accents, glyph.DUSK, s * 2) end
   glyph.off(400)
 
 else

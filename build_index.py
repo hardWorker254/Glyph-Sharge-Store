@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds ``index.json`` from the scripts in ``animations/``.
+"""Builds ``index.json`` from the scripts in ``animations/`` and ``services/``.
 
 **The index is generated, never hand-written.** It exists so the app has one
 small file to fetch and something to check a script's hash against — and the
@@ -26,8 +26,15 @@ import re
 import sys
 from pathlib import Path
 
-# The directory holding the scripts, relative to this file's repository root.
-ANIMATIONS_DIR = "animations"
+# Directories and suffixes, relative to this file's repository root.
+# ``kind`` is the catalogue's own type field: it tells the app what a card can
+# do (an animation draws, a service fires) without the app having to guess from
+# a URL whose shape a future host might change.
+SOURCES = (
+    {"dir": "animations", "suffix": ".glyphlua", "kind": "animation"},
+    {"dir": "services", "suffix": ".servicelua", "kind": "service"},
+)
+
 INDEX_PATH = "index.json"
 INDEX_FORMAT = 1
 
@@ -43,9 +50,6 @@ CDN_BASE = (
     "https://raw.githubusercontent.com/hardWorker254/Glyph-Sharge-Store"
     "/refs/heads/main"
 )
-
-#: ``.glyphlua`` — plain Lua, no container to unwrap.
-SUFFIX = ".glyphlua"
 
 #: An id the app will actually keep. Anything else is silently replaced on
 #: import, so catching it here turns a confusing bug into a failed build.
@@ -83,8 +87,8 @@ def header_of(source: str) -> str:
 def body_of(source: str) -> str:
     """The Lua below the header.
 
-    The app refuses a file with no body, so a header-only file is not an
-    animation and does not belong in a catalogue.
+    The app refuses a file with no body, so a header-only file is not a script
+    and does not belong in a catalogue.
     """
     lines = source.splitlines()
     for index, line in enumerate(lines):
@@ -99,7 +103,7 @@ def parse_devices(raw: str) -> list[str]:
     Unrecognised names are dropped, and **an empty result means every model** —
     for the same reason the app treats it that way in a header: ``PHONE4`` from
     a future release is an honest claim rather than a mistake, and refusing the
-    entry over it would leave that animation uninstallable anywhere. An omitted
+    entry over it would leave that script uninstallable anywhere. An omitted
     field is the same statement, made less clearly.
     """
     named = [
@@ -111,7 +115,7 @@ def parse_devices(raw: str) -> list[str]:
     return known or list(KNOWN_DEVICES)
 
 
-def read_animation(path: Path) -> dict:
+def read_item(path: Path, kind_dir: str, kind: str) -> dict:
     """One catalogue entry, or a reason it cannot become one."""
     raw_bytes = path.read_bytes()
     text = raw_bytes.decode("utf-8")
@@ -125,8 +129,8 @@ def read_animation(path: Path) -> dict:
     # touched.
     devices = parse_devices(read_field(header, "devices"))
 
-    animation_id = read_field(header, "id") or path.stem
-    name = read_field(header, "name") or animation_id
+    item_id = read_field(header, "id") or path.stem
+    name = read_field(header, "name") or item_id
     author = read_field(header, "author")
     license_ = read_field(header, "license")
 
@@ -134,9 +138,9 @@ def read_animation(path: Path) -> dict:
     # rights rather than code. An entry missing one is refused here rather than
     # shipped and dropped on the phone.
     problems = []
-    if not ID_PATTERN.match(animation_id):
+    if not ID_PATTERN.match(item_id):
         problems.append(
-            f"id '{animation_id}' is not [a-zA-Z0-9_-] — "
+            f"id '{item_id}' is not [a-zA-Z0-9_-] — "
             "the app would replace it on import"
         )
     if not author:
@@ -158,14 +162,15 @@ def read_animation(path: Path) -> dict:
         updated = 0
 
     return {
-        "id": animation_id,
+        "id": item_id,
+        "type": kind,
         "name": name,
         "author": author,
         "license": license_,
         "description": read_field(header, "description"),
         "version": version,
         "devices": devices,
-        "url": f"{CDN_BASE}/{ANIMATIONS_DIR}/{path.name}",
+        "url": f"{CDN_BASE}/{kind_dir}/{path.name}",
         # Over the bytes on disk, which is what the phone will download. Not
         # over the decoded text: a newline-normalising read would produce a
         # hash no fetch could ever match.
@@ -176,25 +181,30 @@ def read_animation(path: Path) -> dict:
 
 def build(root: Path) -> tuple[dict, int]:
     """The whole index, and how many scripts had to be refused."""
-    animations = root / ANIMATIONS_DIR
-    if not animations.is_dir():
-        raise SystemExit(
-            f"no {ANIMATIONS_DIR}/ directory — run this from the repository root"
-        )
-
     entries = []
     refused = 0
 
-    # Sorted by file name, so the walk order cannot vary between machines.
-    for path in sorted(animations.glob(f"*{SUFFIX}")):
-        entry = read_animation(path)
-        if "error" in entry:
-            print(f"✗ {path.name}: {entry['error']}", file=sys.stderr)
-            refused += 1
+    for source in SOURCES:
+        directory = root / source["dir"]
+        # A missing directory is fine when a kind has not been published yet;
+        # it is not fine for the animations the store already ships.
+        if not directory.is_dir():
+            if source["dir"] == "animations":
+                raise SystemExit(
+                    f"no {source['dir']}/ directory — run this from the repository root"
+                )
             continue
-        entries.append(entry)
 
-    # Sorted by id, so re-sorting the directory does not produce a diff in the
+        # Sorted by file name, so the walk order cannot vary between machines.
+        for path in sorted(directory.glob(f"*{source['suffix']}")):
+            entry = read_item(path, source["dir"], source["kind"])
+            if "error" in entry:
+                print(f"✗ {path.name}: {entry['error']}", file=sys.stderr)
+                refused += 1
+                continue
+            entries.append(entry)
+
+    # Sorted by id, so re-sorting the directories does not produce a diff in the
     # one file every phone downloads.
     entries.sort(key=lambda item: item["id"])
 
@@ -234,7 +244,7 @@ def main(argv: list[str]) -> int:
 
         if committed != text:
             print(
-                f"✗ {INDEX_PATH} is out of date with {ANIMATIONS_DIR}/.\n"
+                f"✗ {INDEX_PATH} is out of date with the script directories.\n"
                 "  Run `python3 build_index.py` and commit the result.",
                 file=sys.stderr,
             )
